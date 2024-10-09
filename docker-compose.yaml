@@ -1,0 +1,54 @@
+version: '3.1'
+services:
+    db_vector:
+        image: qdrant/qdrant
+        ports:
+          - 6333:6333
+        volumes:
+          - /d/data/qdrant_storage:/qdrant/storage
+
+    ollama:
+      build:
+        context: .
+        dockerfile: ./Dockerfile.ollama
+      image: ollama
+      container_name: ollama
+      env_file: .env
+      entrypoint: /tmp/run_ollama.sh
+      ports:
+        - 11434:11434
+      volumes:
+        - .:/app/
+        - ./ollama/ollama:/root/.ollama
+      pull_policy: always
+      tty: true
+      restart: always
+      networks:
+        - ollama-docker
+
+
+    # ollama-webui:
+    #   image: ghcr.io/open-webui/open-webui:main
+    #   container_name: ollama-webui
+    #   volumes:
+    #     - ./ollama/ollama-webui:/app/backend/data
+    #   depends_on:
+    #     - ollama
+    #   ports:
+    #     - 8080:8080
+    #   environment: # https://docs.openwebui.com/getting-started/env-configuration#default_models
+    #     - OLLAMA_BASE_URLS=http://host.docker.internal:7869 #comma separated ollama hosts
+    #     - ENV=dev
+    #     - WEBUI_AUTH=False
+    #     - WEBUI_NAME=valiantlynx AI
+    #     - WEBUI_URL=http://localhost:8080
+    #     - WEBUI_SECRET_KEY=t0p-s3cr3t
+    #   extra_hosts:
+    #     - host.docker.internal:host-gateway
+    #   restart: unless-stopped
+    #   networks:
+    #     - ollama-docker
+
+networks:
+  ollama-docker:
+    external: false
