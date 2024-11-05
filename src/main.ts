@@ -24,11 +24,11 @@ const metricsMiddleware = promBundle({
   },
 });
 
-
 export const container = awilix.createContainer({
   injectionMode: awilix.InjectionMode.CLASSIC,
 });
-app.use(express.json(), routerLLM, routerHealth, metricsMiddleware);
+app.use(metricsMiddleware);
+app.use(express.json(), routerLLM, routerHealth);
 
 app.listen("3000", async () => {
   injectionDependencies();
