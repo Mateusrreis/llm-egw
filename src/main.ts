@@ -6,13 +6,29 @@ import { EventEmitter } from "events";
 import { LearningEventHandlers } from "./portsAdapter/events/learning.event";
 import routerLLM from "./portsAdapter/controlers/llm.controller";
 import routerHealth from "./portsAdapter/controlers/health.controller";
+import promBundle from "express-prom-bundle";
 
 const app = express();
+
+const metricsMiddleware = promBundle({
+  includeMethod: true,
+  includePath: true,
+  includeStatusCode: true,
+  includeUp: true,
+  customLabels: {
+    project_name: "api_llm",
+    project_type: "llm",
+  },
+  promClient: {
+    collectDefaultMetrics: {},
+  },
+});
+
 
 export const container = awilix.createContainer({
   injectionMode: awilix.InjectionMode.CLASSIC,
 });
-app.use(express.json(), routerLLM, routerHealth);
+app.use(express.json(), routerLLM, routerHealth, metricsMiddleware);
 
 app.listen("3000", async () => {
   injectionDependencies();
@@ -44,5 +60,5 @@ function injectionDependencies() {
     })
     .register({
       eventEmitter: awilix.asValue(new EventEmitter()),
-    })
+    });
 }
