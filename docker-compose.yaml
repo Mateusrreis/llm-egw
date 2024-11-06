@@ -26,6 +26,18 @@ services:
       networks:
         - ollama-docker
 
+    api_llm:
+      build:
+        context: .
+        dockerfile: ./Dockerfile
+      image: llm_api
+      container_name: llm_api
+      env_file: .env
+      ports:
+        - 8080:8080
+      restart: always
+      tty: true
+      
 
     # ollama-webui:
     #   image: ghcr.io/open-webui/open-webui:main

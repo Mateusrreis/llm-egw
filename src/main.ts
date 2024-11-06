@@ -30,7 +30,7 @@ export const container = awilix.createContainer({
 app.use(metricsMiddleware);
 app.use(express.json(), routerLLM, routerHealth);
 
-app.listen("3000", async () => {
+app.listen("3000", async () => { //Todo arrumar a porta
   injectionDependencies();
   const learning = container.resolve<LearningEventHandlers>("learningEvent");
   learning.registerRouteEventHandlers();
