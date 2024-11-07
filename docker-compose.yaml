@@ -6,25 +6,8 @@ services:
           - 6333:6333
         volumes:
           - /d/data/qdrant_storage:/qdrant/storage
-
-    ollama:
-      build:
-        context: .
-        dockerfile: ./Dockerfile.ollama
-      image: ollama
-      container_name: ollama
-      env_file: .env
-      entrypoint: /tmp/run_ollama.sh
-      ports:
-        - 11434:11434
-      volumes:
-        - .:/app/
-        - ./ollama/ollama:/root/.ollama
-      pull_policy: always
-      tty: true
-      restart: always
-      networks:
-        - ollama-docker
+        networks:
+          - llm-docker
 
     api_llm:
       build:
@@ -33,34 +16,39 @@ services:
       image: llm_api
       container_name: llm_api
       env_file: .env
-      ports:
-        - 8080:8080
+      expose:
+        - 8080
+        - 3000
       restart: always
       tty: true
+      depends_on:
+        - db_vector
+      networks:
+        - llm-docker
+
+    nginx_proxy:
+      build:
+        context: .
+        dockerfile: ./Dockerfile.proxy
+      image: nginx_proxy
+      container_name: nginx_proxy
+      env_file: .env
+      ports:
+        - 8080:8080
+        - 80:80
+      restart: always
+      tty: true
+      depends_on:
+        - api_llm
+        - db_vector
+      networks:
+        - llm-docker
+        - api_gateway
       
 
-    # ollama-webui:
-    #   image: ghcr.io/open-webui/open-webui:main
-    #   container_name: ollama-webui
-    #   volumes:
-    #     - ./ollama/ollama-webui:/app/backend/data
-    #   depends_on:
-    #     - ollama
-    #   ports:
-    #     - 8080:8080
-    #   environment: # https://docs.openwebui.com/getting-started/env-configuration#default_models
-    #     - OLLAMA_BASE_URLS=http://host.docker.internal:7869 #comma separated ollama hosts
-    #     - ENV=dev
-    #     - WEBUI_AUTH=False
-    #     - WEBUI_NAME=valiantlynx AI
-    #     - WEBUI_URL=http://localhost:8080
-    #     - WEBUI_SECRET_KEY=t0p-s3cr3t
-    #   extra_hosts:
-    #     - host.docker.internal:host-gateway
-    #   restart: unless-stopped
-    #   networks:
-    #     - ollama-docker
-
+   
 networks:
-  ollama-docker:
-    external: false
+  llm-docker:
+    internal: true
+  api_gateway:
+  
