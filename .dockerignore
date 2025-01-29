@@ -1,0 +1,4 @@
+/ollama
+/node_modules
+/dist
+./run_ollama.sh
