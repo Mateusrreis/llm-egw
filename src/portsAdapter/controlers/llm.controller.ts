@@ -15,7 +15,7 @@ routerLLM.post(
   upload.single("doc"),
   (req: Request, res: Response) => {
     
-    if (req.file == null) {
+    if (!req.file) {
       res
         .status(HttpStatusEnum.BAD_REQUEST)
         .json({ status: "Request invalid" });

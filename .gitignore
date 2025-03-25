@@ -3,3 +3,4 @@
 /dist
 *.txt
 .env
+/prometheus_data
